@@ -1,0 +1,224 @@
+namespace "Tastatur"
+{
+    using "System";
+    using "System.IO";
+    using "ARM.CortexM";
+    using "ARM.CortexM.Advanced";
+
+    public class Ps2Interface
+    {
+
+        // -----------------------------------------------
+
+        #region get/set
+
+        // -----------------------------------------------
+
+        private GpioPin clock_input;
+        private GpioPin data_input;
+
+        private GpioPin clock_output;
+        private GpioPin data_output;
+
+        // -----------------------------------------------
+
+        #endregion get/set
+
+        // -----------------------------------------------
+
+        #region ctor
+
+        // -----------------------------------------------
+
+        public this new ( GpioPin clock_input, GpioPin data_input, GpioPin clock_output, GpioPin data_output )
+        {
+            this.clock_input = clock_input;
+            this.data_input = data_input;
+            this.clock_output = clock_output;
+            this.data_output = data_output;
+
+            this;
+        }
+
+        // -----------------------------------------------
+
+        #endregion ctor
+
+        // -----------------------------------------------
+
+        #region methods
+
+        // -----------------------------------------------
+
+        public bool ReadyToReceive (  )
+        {
+            this.clock_output.Write ( 1 );
+            this.data_output.Write ( 1 );
+        }
+
+        // -----------------------------------------------
+
+        public bool BusyNow (  )
+        {
+            this.data_output.Write ( 1 );
+            this.clock_output.Write ( 0 );
+        }
+
+        // -----------------------------------------------
+
+        private bool CheckClockIsNotSet (  )
+        {
+            if (this.clock_input.Read (  )) return false;
+
+            true;
+        }
+
+        // -----------------------------------------------
+
+        public int Receive (  )
+        {
+            while ( this.CheckClockIsNotSet (  ) ) {  }
+
+            if ( this.data_input.Read (  ) ) return false;
+
+            this.clock_output.Write ( 0 );
+
+            int result = 0;
+            int currentParity = 1;
+
+            for (int position = 0; position < 8; position = position + 1)
+            {
+                int oneBit = this.ReceiveOneBit (  );
+                if (oneBit & 0x2) return false;
+
+                if (oneBit)
+                {
+                    if (currentParity) { currentParity = 0 }
+                    else { currentParity = 1 }
+                }
+
+                result = result | (oneBit << position);
+            }
+
+            int parity = this.ReceiveOneBit (  );
+            if (parity & 0x2) return false;
+
+            this.clock_output.Write ( 1 );
+
+            this.data_output.Write ( 0 );
+
+            this.clock_output.Write ( 1 );
+
+            this.data_output.Write ( 1 );
+
+            if (parity != currentParity) return 0x100;
+
+            result;
+        }
+
+        // -----------------------------------------------
+
+        private bool TaktLow (  )
+        {
+            bool isok = this.clock_input.Read (  );
+            if ( !isok ) return false;
+
+            // wait 20 micro s
+
+            this.clock_output.Write ( 0 );
+
+            // wait 20 micro s
+
+            true
+        }
+
+        // -----------------------------------------------
+
+        private bool TaktHigh (  )
+        {
+            // wait 20 micro s
+
+            this.clock_output.Write ( 1 );
+
+            // wait 20 micro s
+
+            this.clock_input.Read (  );
+        }
+
+        // -----------------------------------------------
+
+        private int ReceiveOneBit (  )
+        {
+            bool isok = this.TaktHigh (  );
+            if (!isok) return 2;
+
+            int result = this.data_input.Read (  );
+
+            isok = this.TaktLow (  );
+            if (!isok) return 2;
+
+            result;
+        }
+
+        // -----------------------------------------------
+
+        private bool TransmissionOneBit ( int oneBit )
+        {
+            bool isok = this.TaktHigh (  );
+            if (!isok) return false;
+
+            this.data_output.Write ( 0 );
+
+            this.TaktLow (  );
+        }
+
+        // -----------------------------------------------
+
+        public bool Send ( int data )
+        {
+            data = data & 0xFF;
+
+            while ( this.CheckClockIsNotSet (  ) ) {  }
+
+            bool isok = this.data_input.Read (  );
+            if ( !isok ) return false;
+
+            isok = this.TransmissionOneBit ( 0 );
+            if (!isok) return false;
+
+            int currentParity = 1;
+
+            for (int position = 0; position < 8; position = position + 1)
+            {
+                int oneBit = (data >> position) & 1;
+
+                if (oneBit)
+                {
+                    if (currentParity) { currentParity = 0 }
+                    else { currentParity = 1 }
+                }
+
+                isok = this.TransmissionOneBit ( oneBit );
+                if (!isok) return false;;
+            }
+
+            isok = this.TransmissionOneBit ( currentParity );
+            if (!isok) return false;
+
+            isok = this.TransmissionOneBit ( 1 );
+            if (!isok) return false;
+
+            this.clock_output.Write ( 1 );
+
+            true;
+        }
+
+        // -----------------------------------------------
+
+        #endregion methods
+
+        // -----------------------------------------------
+
+    }
+
+}

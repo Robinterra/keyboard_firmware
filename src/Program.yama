@@ -1,0 +1,83 @@
+namespace "Program"
+{
+    using "System";
+    using "System.IO";
+    using "System.Time";
+    using "ARM.CortexM";
+    using "ARM.CortexM.Advanced";
+    using "Tastatur";
+
+    public class Program
+    {
+
+        #region get/set
+
+        #endregion get/set
+
+        static bool Init()
+        {
+            Gpio port = IORegister.PortA (  );
+            //Gpio portC = IORegister.PortC (  );
+            //AnalogToDigitalConverter adc1 = IORegister.Adc1 (  );
+            //ResetAndClockControl rcc = IORegister.Rcc (  );
+
+            //rcc.EnableAdc1 (  );
+            //adc1.Init (  );
+
+            port.InitPort ( 1, IORegisterMode.Read );
+            port.InitPort ( 2, IORegisterMode.Read );
+            port.InitPort ( 3, IORegisterMode.Read );
+
+            port.InitPort ( 4, IORegisterMode.Write );
+            port.InitPort ( 5, IORegisterMode.Write );
+            port.InitPort ( 6, IORegisterMode.Write );
+
+            //portC.InitPort ( 4, IORegisterMode.Write );
+            //portC.InitPort ( 3, IORegisterMode.Write );
+        }
+
+        static Ps2Interface InitPs2Interface()
+        {
+            Gpio port = IORegister.PortA (  );
+
+            GpioPin clock_input = new GpioPin(port, 1);
+            GpioPin data_input = new GpioPin(port, 2);
+            GpioPin clock_output = new GpioPin(port, 4);
+            GpioPin data_output = new GpioPin(port, 5);
+
+            new Ps2Interface ( clock_input, data_input, clock_output, data_output );
+        }
+
+        static int main (  )
+        {
+            Program.Init();
+
+            Ps2Interface ps2Interface = Program.InitPs2Interface();
+            ps2Interface.ReadyToReceive (  );
+
+            ps2Interface.Send ( Ps2Command.BatSucess );
+
+            while (true)
+            {
+                int cmd = ps2Interface.Receive (  );
+
+                if (!cmd) continue;
+                if (cmd == 0x100) continue;
+
+                ps2Interface.Send ( Ps2Command.Acknowledge );
+            }
+
+            return 0;
+        }
+
+        #region ctor
+
+        #endregion ctor
+
+        #region methods
+
+        #endregion methods
+
+    }
+
+}
