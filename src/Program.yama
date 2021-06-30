@@ -5,7 +5,7 @@ namespace "Program"
     using "System.Time";
     using "ARM.CortexM";
     using "ARM.CortexM.Advanced";
-    using "Tastatur";
+    using "Ps2";
 
     public class Program
     {
@@ -17,54 +17,42 @@ namespace "Program"
         static bool Init()
         {
             Gpio port = IORegister.PortA (  );
-            //Gpio portC = IORegister.PortC (  );
-            //AnalogToDigitalConverter adc1 = IORegister.Adc1 (  );
-            //ResetAndClockControl rcc = IORegister.Rcc (  );
+            Gpio portC = IORegister.PortC (  );
+            ResetAndClockControl rcc = IORegister.Rcc (  );
 
-            //rcc.EnableAdc1 (  );
-            //adc1.Init (  );
+            rcc.EnableGpioPorts ( 0xf );
+            port.InitPort ( 1, PinMode.Read );
+            port.InitPort ( 3, PinMode.Read );
+            port.InitPort ( 4, PinMode.Write );
+            port.InitPort ( 5, PinMode.Write );
 
-            port.InitPort ( 1, IORegisterMode.Read );
-            port.InitPort ( 2, IORegisterMode.Read );
-            port.InitPort ( 3, IORegisterMode.Read );
-
-            port.InitPort ( 4, IORegisterMode.Write );
-            port.InitPort ( 5, IORegisterMode.Write );
-            port.InitPort ( 6, IORegisterMode.Write );
-
-            //portC.InitPort ( 4, IORegisterMode.Write );
-            //portC.InitPort ( 3, IORegisterMode.Write );
+            portC.InitPort ( 13, PinMode.Read );
         }
 
-        static Ps2Interface InitPs2Interface()
+        static Ps2InterfaceClient InitPs2Interface()
         {
             Gpio port = IORegister.PortA (  );
 
             GpioPin clock_input = new GpioPin(port, 1);
-            GpioPin data_input = new GpioPin(port, 2);
+            GpioPin data_input = new GpioPin(port, 3);
             GpioPin clock_output = new GpioPin(port, 4);
             GpioPin data_output = new GpioPin(port, 5);
 
-            new Ps2Interface ( clock_input, data_input, clock_output, data_output );
+            return new Ps2InterfaceClient ( clock_input, data_input, clock_output, data_output );
         }
 
         static int main (  )
         {
             Program.Init();
 
-            Ps2Interface ps2Interface = Program.InitPs2Interface();
-            ps2Interface.ReadyToReceive (  );
+            Ps2InterfaceClient ps2Interface = Program.InitPs2Interface();
+            ps2Interface.InitialState (  );
 
             ps2Interface.Send ( Ps2Command.BatSucess );
 
             while (true)
             {
-                int cmd = ps2Interface.Receive (  );
-
-                if (!cmd) continue;
-                if (cmd == 0x100) continue;
-
-                ps2Interface.Send ( Ps2Command.Acknowledge );
+                if (!Program.Loop ( ps2Interface )) continue;
             }
 
             return 0;
@@ -75,6 +63,27 @@ namespace "Program"
         #endregion ctor
 
         #region methods
+
+        public static bool Receive ( Ps2InterfaceClient ps2Interface )
+        {
+            int cmd = ps2Interface.Receive (  );
+
+            if (!cmd) return false;
+            if (cmd == 0x100) return false;
+
+            ps2Interface.Send ( Ps2Command.Acknowledge );
+
+            return true;
+        }
+
+        public static bool Loop ( Ps2InterfaceClient ps2Interface )
+        {
+            if ( !ps2Interface.InitialState (  ) ) return false;
+
+            if ( ps2Interface.IsRequestToSendFromHost (  ) ) return Program.Receive ( ps2Interface );
+
+            return true;
+        }
 
         #endregion methods
 
