@@ -7,12 +7,10 @@ namespace "Program"
     using "ARM.CortexM.Advanced";
     using "Ps2";
 
-    public class Program
+    public static class Program
     {
 
-        #region get/set
-
-        #endregion get/set
+        #region main
 
         static bool Init()
         {
@@ -32,13 +30,24 @@ namespace "Program"
         static Ps2InterfaceClient InitPs2Interface()
         {
             Gpio port = IORegister.PortA (  );
+            ResetAndClockControl rcc = IORegister.Rcc (  );
 
             GpioPin clock_input = new GpioPin(port, 1);
             GpioPin data_input = new GpioPin(port, 3);
             GpioPin clock_output = new GpioPin(port, 4);
             GpioPin data_output = new GpioPin(port, 5);
 
-            return new Ps2InterfaceClient ( clock_input, data_input, clock_output, data_output );
+            return new Ps2InterfaceClient ( clock_input, data_input, clock_output, data_output, rcc );
+        }
+
+        static bool InitCache(Cache cache)
+        {
+            Gpio portC = IORegister.PortC (  );
+
+            GpioPin button = new GpioPin(portC, 13);
+            cache.HKey = button;
+
+            return true;
         }
 
         static int main (  )
@@ -48,41 +57,100 @@ namespace "Program"
             Ps2InterfaceClient ps2Interface = Program.InitPs2Interface();
             ps2Interface.InitialState (  );
 
+            Cache cache = new Cache();
+            Program.InitCache(cache);
+            cache.LastSendByte = Ps2Command.BatSucess;
+
             ps2Interface.Send ( Ps2Command.BatSucess );
+
+            //ps2Interface.Send ( "hallo welt" );
 
             while (true)
             {
-                if (!Program.Loop ( ps2Interface )) continue;
+                ps2Interface.rcc.WaitInMicroSeconds ( 10000 );
+
+                if (!Program.Loop ( ps2Interface, cache )) continue;
             }
 
             return 0;
         }
 
-        #region ctor
-
-        #endregion ctor
+        #endregion main
 
         #region methods
 
-        public static bool Receive ( Ps2InterfaceClient ps2Interface )
+        public static bool Receive ( Ps2InterfaceClient ps2Interface, Cache cache )
         {
             int cmd = ps2Interface.Receive (  );
 
+            if (cmd == 0x100) return cache.NextSendByte(Ps2Command.Resend);
+            //if (cache.LastCmd) return cache.ExecuteCmdWithArgs(cache, cmd);
             if (!cmd) return false;
-            if (cmd == 0x100) return false;
+            if (cmd == Ps2Command.Acknowledge) return true;
+            if (cmd == Ps2Command.Echo) return cache.NextSendByte(Ps2Command.Echo);
+            if (cmd == Ps2Command.Resend) return cache.NextSendByte(cache.LastSendByte);
 
-            ps2Interface.Send ( Ps2Command.Acknowledge );
+            cache.NextSendByte ( Ps2Command.Acknowledge );
 
             return true;
         }
 
-        public static bool Loop ( Ps2InterfaceClient ps2Interface )
+        public static bool Send ( Ps2InterfaceClient ps2Interface, Cache cache )
+        {
+            ps2Interface.Send ( cache.NextSendBytes );
+
+            cache.LastSendByte = cache.NextSendBytes & 0xff;
+            cache.NextSendBytes = cache.NextSendBytes >> 8;
+
+            return true;
+        }
+
+        public static bool Loop ( Ps2InterfaceClient ps2Interface, Cache cache )
         {
             if ( !ps2Interface.InitialState (  ) ) return false;
 
-            if ( ps2Interface.IsRequestToSendFromHost (  ) ) return Program.Receive ( ps2Interface );
+            if ( ps2Interface.IsRequestToSendFromHost (  ) ) return Program.Receive ( ps2Interface, cache );
+
+            if ( cache.NextSendBytes ) return Program.Send ( ps2Interface, cache );
+
+            // H Key psuh
+
+            bool readKey = cache.HKey.Read();
+            if (!readKey) return Program.ButtonClicked ( cache, 0x22 );
+
+            return Program.ButtonNotClicked ( cache, 0x22 );
+        }
+
+        public static bool ButtonClicked ( Cache cache, int keyCode )
+        {
+            bool isbutton = cache.LastKey == keyCode;
+            if (isbutton) return true;
+
+            return Program.MakeKey ( cache, keyCode );
+        }
+
+        public static bool ButtonNotClicked ( Cache cache, int keyCode )
+        {
+            bool isbutton = cache.LastKey == keyCode;
+            if (isbutton) return Program.BreakKey ( cache, keyCode );
 
             return true;
+        }
+
+        public static bool MakeKey ( Cache cache, int keyCode )
+        {
+            cache.LastKey = keyCode;
+
+            return cache.NextSendByte ( keyCode );
+        }
+
+        public static bool BreakKey ( Cache cache, int keyCode )
+        {
+            cache.LastKey = 0;
+
+            cache.NextSendByte ( keyCode );
+
+            return cache.NextSendByte ( 0xf0 );
         }
 
         #endregion methods

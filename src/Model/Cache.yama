@@ -1,0 +1,52 @@
+namespace "Program"
+{
+    using "System";
+
+    public class Cache
+    {
+
+        #region vars
+
+        public int LastCmd;
+
+        public int LastSendByte;
+
+        public int NextSendBytes;
+
+        public int LastKey;
+
+        public GpioPin HKey;
+
+        #endregion vars
+
+        #region get/set
+
+        #endregion get/set
+
+        #region ctor
+
+        public this new()
+        {
+            this.NextSendBytes = 0;
+
+            return this;
+        }
+
+        #endregion ctor
+
+        #region methods
+
+        public bool NextSendByte ( int data )
+        {
+            if (data == 0) return false;
+
+            int tmp = this.NextSendBytes << 8;
+            this.NextSendBytes = tmp | data;
+        }
+
+
+        #endregion methods
+
+    }
+
+}

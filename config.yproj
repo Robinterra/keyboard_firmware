@@ -1,5 +1,5 @@
 Target:"arm-t32"
-Skip:0x20000000
+Skip:0x08000000
 StartNamespace:"Program"
 Optimize:2
 
@@ -17,5 +17,5 @@ package: {
 
 package: {
     git.repository:"https://github.com/Robinterra/ps2interface.git"
-    git.branch:"master"
+    git.branch:"slowMode"
 }
