@@ -17,5 +17,5 @@ package: {
 
 package: {
     git.repository:"https://github.com/Robinterra/ps2interface.git"
-    git.branch:"slowMode"
+    git.branch:"master"
 }

@@ -67,7 +67,7 @@ namespace "Program"
 
             while (true)
             {
-                ps2Interface.rcc.WaitInMicroSeconds ( 10000 );
+                ps2Interface.rcc.WaitInMicroSeconds ( 1000 );
 
                 if (!Program.Loop ( ps2Interface, cache )) continue;
             }
@@ -116,9 +116,9 @@ namespace "Program"
             // H Key psuh
 
             bool readKey = cache.HKey.Read();
-            if (!readKey) return Program.ButtonClicked ( cache, 0x22 );
+            if (!readKey) return Program.ButtonClicked ( cache, 0x31 );
 
-            return Program.ButtonNotClicked ( cache, 0x22 );
+            return Program.ButtonNotClicked ( cache, 0x31 );
         }
 
         public static bool ButtonClicked ( Cache cache, int keyCode )
