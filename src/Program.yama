@@ -42,6 +42,8 @@ namespace "Program"
 
         static bool InitCache(Cache cache)
         {
+            if (cache is null) return false;
+
             Gpio portC = IORegister.PortC (  );
 
             GpioPin button = new GpioPin(portC, 13);
@@ -55,9 +57,13 @@ namespace "Program"
             Program.Init();
 
             Ps2InterfaceClient ps2Interface = Program.InitPs2Interface();
+            if (ps2Interface is null) return 0;
+
             ps2Interface.InitialState (  );
 
             Cache cache = new Cache();
+            if (cache is null) return 0;
+
             Program.InitCache(cache);
             cache.LastSendByte = Ps2Command.BatSucess;
 
@@ -81,6 +87,9 @@ namespace "Program"
 
         public static bool Receive ( Ps2InterfaceClient ps2Interface, Cache cache )
         {
+            if (ps2Interface is null) return false;
+            if (cache is null) return false;
+
             int cmd = ps2Interface.Receive (  );
 
             if (cmd == 0x100) return cache.NextSendByte(Ps2Command.Resend);
@@ -97,6 +106,9 @@ namespace "Program"
 
         public static bool Send ( Ps2InterfaceClient ps2Interface, Cache cache )
         {
+            if (ps2Interface is null) return false;
+            if (cache is null) return false;
+
             ps2Interface.Send ( cache.NextSendBytes );
 
             cache.LastSendByte = cache.NextSendBytes & 0xff;
@@ -107,6 +119,9 @@ namespace "Program"
 
         public static bool Loop ( Ps2InterfaceClient ps2Interface, Cache cache )
         {
+            if (ps2Interface is null) return false;
+            if (cache is null) return false;
+
             if ( !ps2Interface.InitialState (  ) ) return false;
 
             if ( ps2Interface.IsRequestToSendFromHost (  ) ) return Program.Receive ( ps2Interface, cache );
@@ -123,6 +138,8 @@ namespace "Program"
 
         public static bool ButtonClicked ( Cache cache, int keyCode )
         {
+            if (cache is null) return false;
+
             bool isbutton = cache.LastKey == keyCode;
             if (isbutton) return true;
 
@@ -131,6 +148,8 @@ namespace "Program"
 
         public static bool ButtonNotClicked ( Cache cache, int keyCode )
         {
+            if (cache is null) return false;
+
             bool isbutton = cache.LastKey == keyCode;
             if (isbutton) return Program.BreakKey ( cache, keyCode );
 
@@ -139,6 +158,8 @@ namespace "Program"
 
         public static bool MakeKey ( Cache cache, int keyCode )
         {
+            if (cache is null) return false;
+
             cache.LastKey = keyCode;
 
             return cache.NextSendByte ( keyCode );
@@ -146,6 +167,8 @@ namespace "Program"
 
         public static bool BreakKey ( Cache cache, int keyCode )
         {
+            if (cache is null) return false;
+
             cache.LastKey = 0;
 
             cache.NextSendByte ( keyCode );
