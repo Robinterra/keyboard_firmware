@@ -1,0 +1,227 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L MCU_ST_STM32F4:STM32F401RCTx U?
+U 1 1 62384A24
+P 9900 2650
+F 0 "U?" H 9850 4531 50  0000 C CNN
+F 1 "STM32F401RCTx" H 9850 4440 50  0000 C CNN
+F 2 "Package_QFP:LQFP-64_10x10mm_P0.5mm" H 9300 950 50  0001 R CNN
+F 3 "http://www.st.com/st-web-ui/static/active/en/resource/technical/document/datasheet/DM00086815.pdf" H 9900 2650 50  0001 C CNN
+	1    9900 2650
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:+5VD #PWR?
+U 1 1 623884A2
+P 2000 1000
+F 0 "#PWR?" H 2000 850 50  0001 C CNN
+F 1 "+5VD" H 2015 1173 50  0000 C CNN
+F 2 "" H 2000 1000 50  0001 C CNN
+F 3 "" H 2000 1000 50  0001 C CNN
+	1    2000 1000
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 623898F1
+P 4950 1000
+F 0 "#PWR?" H 4950 750 50  0001 C CNN
+F 1 "GND" H 4955 827 50  0000 C CNN
+F 2 "" H 4950 1000 50  0001 C CNN
+F 3 "" H 4950 1000 50  0001 C CNN
+	1    4950 1000
+	-1   0    0    1   
+$EndComp
+Text GLabel 2000 2000 0    50   BiDi ~ 0
+ps2_clock_Dminus
+Text GLabel 2000 4000 0    50   BiDi ~ 0
+ps2_data_Dplus
+$Comp
+L Device:R R4
+U 1 1 62389F9F
+P 2500 1450
+F 0 "R4" H 2570 1496 50  0000 L CNN
+F 1 "10000" H 2570 1405 50  0000 L CNN
+F 2 "" V 2430 1450 50  0001 C CNN
+F 3 "~" H 2500 1450 50  0001 C CNN
+	1    2500 1450
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R3
+U 1 1 6238A4E6
+P 2450 3650
+F 0 "R3" H 2520 3696 50  0000 L CNN
+F 1 "10000" H 2520 3605 50  0000 L CNN
+F 2 "" V 2380 3650 50  0001 C CNN
+F 3 "~" H 2450 3650 50  0001 C CNN
+	1    2450 3650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2000 2000 2500 2000
+Wire Wire Line
+	2500 2000 2500 1600
+Wire Wire Line
+	2500 1300 2500 1000
+Wire Wire Line
+	2500 1000 2000 1000
+$Comp
+L Device:R R2
+U 1 1 6238B995
+P 5950 2000
+F 0 "R2" V 5743 2000 50  0000 C CNN
+F 1 "1000" V 5834 2000 50  0000 C CNN
+F 2 "" V 5880 2000 50  0001 C CNN
+F 3 "~" H 5950 2000 50  0001 C CNN
+	1    5950 2000
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2500 2000 4950 2000
+Connection ~ 2500 2000
+Wire Wire Line
+	6100 2000 8500 2000
+Wire Wire Line
+	8500 2000 8500 3850
+Wire Wire Line
+	8500 3850 9300 3850
+$Comp
+L Transistor_BJT:BC547 Q?
+U 1 1 6238C6B7
+P 5050 1500
+F 0 "Q?" H 5241 1454 50  0000 L CNN
+F 1 "BC547" H 5241 1545 50  0000 L CNN
+F 2 "Package_TO_SOT_THT:TO-92_Inline" H 5250 1425 50  0001 L CIN
+F 3 "https://www.onsemi.com/pub/Collateral/BC550-D.pdf" H 5050 1500 50  0001 L CNN
+	1    5050 1500
+	-1   0    0    1   
+$EndComp
+Connection ~ 4950 2000
+Wire Wire Line
+	4950 2000 5800 2000
+Wire Wire Line
+	8600 3650 9300 3650
+$Comp
+L Device:R R1
+U 1 1 6238DBBB
+P 5950 1500
+F 0 "R1" V 5743 1500 50  0000 C CNN
+F 1 "150" V 5834 1500 50  0000 C CNN
+F 2 "" V 5880 1500 50  0001 C CNN
+F 3 "~" H 5950 1500 50  0001 C CNN
+	1    5950 1500
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	4950 2000 4950 1700
+Wire Wire Line
+	5250 1500 5800 1500
+Wire Wire Line
+	8600 3650 8600 1500
+Wire Wire Line
+	8600 1500 6100 1500
+Wire Wire Line
+	4950 1000 4950 1300
+$Comp
+L power:+5VD #PWR?
+U 1 1 62393A1D
+P 2000 3000
+F 0 "#PWR?" H 2000 2850 50  0001 C CNN
+F 1 "+5VD" H 2015 3173 50  0000 C CNN
+F 2 "" H 2000 3000 50  0001 C CNN
+F 3 "" H 2000 3000 50  0001 C CNN
+	1    2000 3000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2000 3000 2450 3000
+Wire Wire Line
+	2450 3000 2450 3500
+Wire Wire Line
+	2000 4000 2450 4000
+Wire Wire Line
+	2450 4000 2450 3800
+$Comp
+L Device:R R5
+U 1 1 62394743
+P 5950 4000
+F 0 "R5" V 5743 4000 50  0000 C CNN
+F 1 "150" V 5834 4000 50  0000 C CNN
+F 2 "" V 5880 4000 50  0001 C CNN
+F 3 "~" H 5950 4000 50  0001 C CNN
+	1    5950 4000
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	6100 4000 8000 4000
+Wire Wire Line
+	8000 4000 8000 4050
+Wire Wire Line
+	8000 4050 9300 4050
+Wire Wire Line
+	5800 4000 4950 4000
+Connection ~ 2450 4000
+$Comp
+L Transistor_BJT:BC547 Q?
+U 1 1 623957D2
+P 5050 3500
+F 0 "Q?" H 5241 3454 50  0000 L CNN
+F 1 "BC547" H 5241 3545 50  0000 L CNN
+F 2 "Package_TO_SOT_THT:TO-92_Inline" H 5250 3425 50  0001 L CIN
+F 3 "https://www.onsemi.com/pub/Collateral/BC550-D.pdf" H 5050 3500 50  0001 L CNN
+	1    5050 3500
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R R7
+U 1 1 623964EC
+P 5950 3500
+F 0 "R7" V 5743 3500 50  0000 C CNN
+F 1 "150" V 5834 3500 50  0000 C CNN
+F 2 "" V 5880 3500 50  0001 C CNN
+F 3 "~" H 5950 3500 50  0001 C CNN
+	1    5950 3500
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	5250 3500 5800 3500
+Wire Wire Line
+	6100 3500 8300 3500
+Wire Wire Line
+	8300 3500 8300 3750
+Wire Wire Line
+	8300 3750 9300 3750
+Wire Wire Line
+	4950 3700 4950 4000
+Connection ~ 4950 4000
+Wire Wire Line
+	4950 4000 2450 4000
+$Comp
+L power:GND #PWR?
+U 1 1 62397D19
+P 4950 2950
+F 0 "#PWR?" H 4950 2700 50  0001 C CNN
+F 1 "GND" H 4955 2777 50  0000 C CNN
+F 2 "" H 4950 2950 50  0001 C CNN
+F 3 "" H 4950 2950 50  0001 C CNN
+	1    4950 2950
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	4950 2950 4950 3300
+$EndSCHEMATC
